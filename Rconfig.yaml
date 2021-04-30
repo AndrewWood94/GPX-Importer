@@ -1,0 +1,21 @@
+input:
+  #osm or hikr
+  type: osm 
+  #csv file containing merged gps data
+  merged_filepath: /Volumes/LaCie/LaCie/LaCie Rugged USB-C/PackageDemo/OSM Out/Merged/Merged.csv
+  #If type = OSM, give filepath of processed hikr data to use for filtering
+  hikr_filepath: /Volumes/LaCie/LaCie/LaCie Rugged USB-C/PackageDemo/Hikr Out/Merged/Merged.csv
+
+output:
+  #destination folder for output files
+  folder: /Volumes/LaCie/LaCie/LaCie Rugged USB-C/PackageDemo/OSM Out/Merged
+  optional: 
+    #Save file with only valid breaks (>30 seconds) tagged
+    valid_breaks_filename: a
+    #Save file with data merged to 50m segments 
+    combined_50_filename: b
+    #Save filtered dataset with breaks tagged
+    output_breaks_filename: c
+  #Save filtered dataset with breaks/non-walking sections removed
+  output_filename: DataPurged
+
