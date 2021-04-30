@@ -1,0 +1,37 @@
+
+#folder containing QGIS executable
+qgis_path: /Users/Andrew/miniconda3/envs/pkg_test/QGIS.app/Contents/MacOS
+#filetype should be either Hikr or OSM
+filetype: osm
+data:
+  #folder containing 10km_grid_region.shp & 100km_grid_region.shp
+  os_grid_folder: /Volumes/LaCie/LaCie/LaCie Rugged USB-C/PackageDemo/gb-grids_4017951 copy
+  GPS_files:
+    hikr:
+      #site for web scraper to find gps tracks
+      website: https://www.hikr.org/region518/ped/?gps=1
+      #location to store json file containing hikr data links
+      folder: /Volumes/LaCie/LaCie/LaCie Rugged USB-C/PackageDemo
+      name: filepaths
+    osm:
+      #folder containing OpenStreetMap tracks to be read
+      folder: /Volumes/LaCie/LaCie/LaCie Rugged USB-C/PackageDemo/gpx-planet-2013-04-09
+  terrain:
+    #folder containing DTM files, split by national grid squares e.g DTM_folder/ht/HT93NE.asc
+    DTM_folder: /Volumes/LaCie/LaCie/LaCie Rugged USB-C/terrain-5-dtm
+    DTM_resolution: 5
+conditions:
+  #run initial filter on OSM data to remove files which are not in region (not required but speeds up processing)
+  #should be set to False if already filtered dataset
+  data_filter: True
+  #location to copy in-scope .gpx files
+  in_scope_folder: /Volumes/LaCie/LaCie/LaCie Rugged USB-C/PackageDemo/OSMInscope
+output:
+  #Location to save gpkg output files
+  gpkg_folder: /Volumes/LaCie/LaCie/LaCie Rugged USB-C/PackageDemo/OSM Out
+  #Name stem for gpkg files, indexes are automatically added for each new track & segment, e.g Data0_001
+  name_root: OSM
+  #location to save merged .gpkg and .csv files
+  merged_folder: /Volumes/LaCie/LaCie/LaCie Rugged USB-C/PackageDemo/OSM Out/Merged
+  #file name to save merged .gpkg and .csv files
+  merged_name: Merged

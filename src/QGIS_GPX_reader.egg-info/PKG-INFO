@@ -1,0 +1,19 @@
+Metadata-Version: 2.1
+Name: QGIS-GPX-reader
+Version: 0.1.0.dev1
+Summary: ""
+Home-page: https://github.com/AndrewWood94/QGIS-GPX-reader
+Author: Andrew Woood
+Author-email: andrew.wood@ed.ac.uk
+License: MIT
+Description: Copied & modified version of from https://github.com/SGroe/gpx-segment-importer
+        
+        
+        # QGIS-GPX-reader
+        Package to scan GPX files, and find the terrain types
+        
+Keywords: ""
+Platform: UNKNOWN
+Classifier: License :: MIT
+Classifier: Programming Language :: Python :: 3
+Description-Content-Type: text/markdown
