@@ -1,16 +1,35 @@
-#Calculate walking slope values & set NA to zero
+main <- function(){
+
+    args <- commandArgs(trailingOnly = TRUE)
+    filename <- args[1]
+
+    list.of.packages <- c("yaml", "dplyr")
+    new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+    if (length(new.packages)){
+      install.packages(new.packages)
+    }
+
+    suppressWarnings(suppressMessages(library(dplyr)))
+    suppressWarnings(suppressMessages(library(configr)))
+
+    parameters = read.config(file = filename)
+
+    AllData50mNoBreaks = prepare(parameters)
+}
+
 walkingSlope = function(df){
-  #Calculate walking slope values
+  #Calculate walking slope values & set NA to zero
   df["slopeOS"] = atan(df$OS.height_diff/df$distance)*180/pi
   df["slope"] = atan(df$elevation_diff/df$distance)*180/pi
-  #Set all null values to zero
   df[is.na(df)]=0
   df = select(df, -OnBreak, everything())
   return(df)
 }
-# if getlengths = true, find lengths of all breaks in dataframe
-# if getlengths = false, tag all breaks > minbreak or containing speed > speedcutoff with OnBreak = 2
+
 findbreaks = function(df, getlengths, minbreak=NULL, speedcutoff = Inf){
+  # if getlengths = true, find lengths of all breaks in dataframe
+  # if getlengths = false, tag all breaks > minbreak or containing speed > speedcutoff with OnBreak = 2
+
   segnos = unique(df$Segment.No)  #Get Segment Numbers
   breaklengths=vector()
   for (segment in segnos) {
@@ -18,11 +37,11 @@ findbreaks = function(df, getlengths, minbreak=NULL, speedcutoff = Inf){
     Onbreak=FALSE
     HighSpeedBreak = FALSE
     duration = 0
-    points = df[df$Segment.No == segment, ] 
+    points = df[df$Segment.No == segment, ]
     for (i in 1:nrow(points)){    #For each segment, loop over the points
       #If breakpoint
       if ((points[ i, 'OnBreak'] == 1) | (points[ i, 'OnBreak'] == 2)) {
-        if(duration==0){          #If point is first breakpoint, note start 
+        if(duration==0){          #If point is first breakpoint, note start
           Onbreak = TRUE
           BreakStart=i
         }
@@ -32,7 +51,7 @@ findbreaks = function(df, getlengths, minbreak=NULL, speedcutoff = Inf){
         }
         duration = duration + points [i, 'duration']  #Calculate break duration
       }
-      
+
       else {
         #If previously on break
         if(Onbreak) {
@@ -70,44 +89,45 @@ findbreaks = function(df, getlengths, minbreak=NULL, speedcutoff = Inf){
     return(df)
   }
 }
-# merge data into intervals, split on variable [type], minimum interval size [condition]
+
 datamerge=function(df,type, condition, terrain = list()){
-  
-  nameslist=c("WKT", "fid", "Segment.No", "Start_DateTime", "duration", "distance", "speed", 
-              "elev_diff_gps", "elev_gain_gps", "elev_drop_gps", 
-              "elev_diff_OS", "elev_gain_OS", "elev_drop_OS", 
+  # merge data into intervals, split on variable [type], minimum interval size [condition]
+
+  nameslist=c("WKT", "fid", "Segment.No", "Start_DateTime", "duration", "distance", "speed",
+              "elev_diff_gps", "elev_gain_gps", "elev_drop_gps",
+              "elev_diff_OS", "elev_gain_OS", "elev_drop_OS",
               "avg_ground_slope_a", "avg_ground_slope_b", "slopeOS", "slope", "OnBreak", terrain)
   merged = setNames(data.frame(matrix(ncol = length(nameslist), nrow = 0)), nameslist)
-  
+
   segnos = unique(df$Segment.No)
-  
-  variables = list('wkt'='', 'fid'=1, 'segno'=0, 
+
+  variables = list('wkt'='', 'fid'=1, 'segno'=0,
                    'dateTime'='','duration'=0,'distance'=0,
                    'elev_diff_gps'=0,'elev_gain_gps'=0,'elev_drop_gps'=0,
                    'elev_diff_OS'=0,'elev_gain_OS'=0,'elev_drop_OS'=0,
-                   "avg_ground_slope_a"=0, "avg_ground_slope_b"=0, 
+                   "avg_ground_slope_a"=0, "avg_ground_slope_b"=0,
                    "avg_slopeOS"=0, "avg_slope"=0,
                    'OnBreak'= 0)
   for (segno in segnos) {
     print(segno)
-    
+
     sample = df[df$Segment.No==segno,]
     variables$segno = segno
     variables$dateTime=sample[1,]$a_time
-    
+
     start_point = strsplit(strsplit(sample[1,]$WKT, ',')[[1]][1],'\\(')[[1]][2]
     variables$wkt = paste("LINESTRING (" , start_point, sep='')
-    
+
     for (i in 1:nrow(sample)){
       #If next point is part of a long break, save the previous point to output
       if(sample[i, 'OnBreak']==2){
-        
+
         if (!variables$OnBreak){
-          
+
           start_point = strsplit(strsplit(sample[i,]$WKT, ',')[[1]][1],'\\(')[[1]][2]
           variables$wkt = paste(variables$wkt, start_point, sep=',')
           variables$wkt = paste(variables$wkt, ')', sep='')
-          
+
           added = savePoint(merged, variables)
           merged = added[[1]]
           variables = added[[2]]
@@ -118,24 +138,24 @@ datamerge=function(df,type, condition, terrain = list()){
         variables$duration = variables$duration + sample[i,]$duration
         variables$distance = variables$distance + sample[i,]$distance
       }
-      
+
       else{
         #If end of break, or timethreshold met, save break or previous section
         if (variables$OnBreak | variables[[type]]>condition){
           start_point = strsplit(strsplit(sample[i,]$WKT, ',')[[1]][1],'\\(')[[1]][2]
           variables$wkt = paste(variables$wkt, start_point, sep=',')
           variables$wkt = paste(variables$wkt, ')', sep='')
-          
+
           added = savePoint(merged, variables)
           merged = added[[1]]
           variables = added[[2]]
           variables$dateTime=sample[i,]$a_time
           variables$wkt = paste("LINESTRING (" , start_point, sep='')
         }
-        
+
         variables$duration = variables$duration + sample[i,]$duration
         variables$distance = variables$distance + sample[i,]$distance
-        
+
         variables$elev_diff_gps = variables$elev_diff_gps + sample[i,]$elevation_diff
         if (sample[i,]$elevation_diff > 0) {
           variables$elev_gain_gps = variables$elev_gain_gps + sample[i,]$elevation_diff
@@ -143,7 +163,7 @@ datamerge=function(df,type, condition, terrain = list()){
         else {
           variables$elev_drop_gps = variables$elev_drop_gps + sample[i,]$elevation_diff
         }
-        
+
         variables$elev_diff_OS = variables$elev_diff_OS + sample[i,]$OS.height_diff
         if (sample[i,]$OS.height_diff > 0) {
           variables$elev_gain_OS = variables$elev_gain_OS + sample[i,]$OS.height_diff
@@ -151,27 +171,27 @@ datamerge=function(df,type, condition, terrain = list()){
         else {
           variables$elev_drop_OS = variables$elev_drop_OS + sample[i,]$OS.height_diff
         }
-        
-        #Calculate slopes as weighted average of time spent on slope 
+
+        #Calculate slopes as weighted average of time spent on slope
         variables$avg_ground_slope_a = variables$avg_ground_slope_a + (sample[i,]$a_OS.slope*sample[i,]$duration)
         variables$avg_ground_slope_b = variables$avg_ground_slope_b + (sample[i,]$b_OS.slope*sample[i,]$duration)
-        
+
         if (sample[i,]$distance>0){
           variables$avg_slopeOS = variables$avg_slopeOS + atan(sample[i,]$OS.height_diff/sample[i,]$distance)*180/pi*sample[i,]$duration
           variables$avg_slope = variables$avg_slope + atan(sample[i,]$elevation_diff/sample[i,]$distance)*180/pi*sample[i,]$duration
         }
-        
+
         for (item in terrain) {
           if (sample[[item]][i]==1) {
             merged[variables$fid,][[item]]=1
           }
         }
-        
+
       }
     }
     end_point = strsplit(sample[i,]$WKT, ',')[[1]][2]
     variables$wkt = paste(variables$wkt, end_point, sep=',')
-    
+
     added = savePoint(merged, variables)
     merged = added[[1]]
     variables = added[[2]]
@@ -180,6 +200,7 @@ datamerge=function(df,type, condition, terrain = list()){
   merged[is.na(merged)]=0
   return(merged)
 }
+
 savePoint = function(df, variables){
   if(variables$duration >0){
     k = variables$fid
@@ -189,7 +210,7 @@ savePoint = function(df, variables){
     df[k,]$Start_DateTime = variables$dateTime
     df[k,]$duration = variables$duration
     df[k,]$distance = variables$distance
-    df[k,]$elev_diff_gps = variables$elev_diff_gps 
+    df[k,]$elev_diff_gps = variables$elev_diff_gps
     df[k,]$elev_gain_gps = variables$elev_gain_gps
     df[k,]$elev_drop_gps = variables$elev_drop_gps
     df[k,]$elev_diff_OS = variables$elev_diff_OS
@@ -198,29 +219,29 @@ savePoint = function(df, variables){
     df[k,]$avg_ground_slope_a = variables$avg_ground_slope_a / variables$duration
     df[k,]$avg_ground_slope_b = variables$avg_ground_slope_b  / variables$duration
     df[k,]$slopeOS = variables$avg_slopeOS/variables$duration
-    df[k,]$slope = variables$avg_slope/variables$duration 
+    df[k,]$slope = variables$avg_slope/variables$duration
     df[k,]$OnBreak = variables$OnBreak
-    
-    variables = list('wkt'= '', 'fid'=k+1, 'segno'=variables$segno, 
+
+    variables = list('wkt'= '', 'fid'=k+1, 'segno'=variables$segno,
                      'dateTime'='','duration'=0,'distance'=0,
                      'elev_diff_gps'=0,'elev_gain_gps'=0,'elev_drop_gps'=0,
                      'elev_diff_OS'=0,'elev_gain_OS'=0,'elev_drop_OS'=0,
-                     "avg_ground_slope_a"=0, "avg_ground_slope_b"=0, 
+                     "avg_ground_slope_a"=0, "avg_ground_slope_b"=0,
                      "avg_slopeOS"=0, "avg_slope"=0,
                      'OnBreak'= 0)
   }
   return (list(df, variables))
 }
-#Filter data using known walking data as criteria
-DataRemoval = function(df, known_values){
 
-  ##  DEAL WITH SEGMENTS WITH WALK/DRIVE SPLIT BY EXTREME POINTS ##
-  
+DataRemoval = function(df, known_values){
+  #Filter data using known walking data as criteria
+
+  # Find extreme points which separate walking/drving sections
   for (i in sort(unique(df$Segment.No))){
-    fids = c(min(df$fid[df$Segment.No == i]), max(df$fid[df$Segment.No == i]))  
+    fids = c(min(df$fid[df$Segment.No == i]), max(df$fid[df$Segment.No == i]))
     fids = c(fids, df$fid[df$Segment.No==i & (df$distance>500 | df$duration>600 | df$speed>100)])
     fids = sort(unique(fids))
-    
+
     #Segments with extreme speeds
     if(length(fids)>2){
       for (j in (1:(length(fids)-1))){
@@ -238,7 +259,7 @@ DataRemoval = function(df, known_values){
       }
     }
   }
-  
+
   #Remove Segments where there is less than 2.5min or 250m of useable data
   segment_ignore=vector()
   for(i in sort(unique(df$Segment.No))){
@@ -258,7 +279,7 @@ DataRemoval = function(df, known_values){
     top_whisker = boxplot(df$speed[df$Segment.No==i & df$OnBreak==0], plot=FALSE)$stats[5]
     if (quant[3] > known_values$Q3max){
       to_remove = c(to_remove, i)
-    }  
+    }
     else if (quant[1] > known_values$medmed){
       to_remove = c(to_remove, i)
     }
@@ -273,8 +294,9 @@ DataRemoval = function(df, known_values){
 
   return(df)
 }
-#Find points adjacent to break points, gaps, or start/end of segment where speed > highspeed and mark as break
+
 highspeedcheck = function(df, highspeed){
+  #Find points adjacent to break points, gaps, or start/end of segment where speed > highspeed and mark as break
   fast = df$fid[df$speed>highspeed & df$OnBreak==0]
   for (i in fast){
     #If previous/next point in segment is a break point
@@ -288,13 +310,14 @@ highspeedcheck = function(df, highspeed){
   }
   return(df)
 }
-#if getlengths = true, return lengths of all sections between breaks (mini-segments)
-#If getlengths = False, tag all mini-segments where the distance < mindist as breaks
+
 finddists = function(df, getlengths, mindist=NULL){
+  #if getlengths = true, return lengths of all sections between breaks (mini-segments)
+  #If getlengths = False, tag all mini-segments where the distance < mindist as breaks
   distances = vector()
   for (i in sort(unique(df$Segment.No))){
     distance = 0
-    points = df[df$Segment.No == i, c('distance', 'OnBreak', 'fid')] 
+    points = df[df$Segment.No == i, c('distance', 'OnBreak', 'fid')]
     for (i in 1:nrow(points)){    #For each segment, loop over the points
       if (points[ i, 'OnBreak'] == 0){
         if (distance == 0){
@@ -335,10 +358,17 @@ finddists = function(df, getlengths, mindist=NULL){
 }
 
 prepare = function(parameters){
-  
-  type = tolower(parameters$input$type)
-  out_folder = parameters$output$folder
-  
+
+  type = tolower(parameters$filetype)
+  in_folder = parameters$input$merged_folder
+  in_file = parameters$input$merged_name
+  in_hikr = parameters$data$processed_hikr_filepath
+  out_folder = parameters$output$processed_folder
+  valid_breaks = parameters$output$optional$valid_breaks_filename
+  combo50 = parameters$output$optional$combined_50_filename
+  processed_breaks_name = parameters$output$optional$processed_breaks_filename
+  processed_name = parameters$output$processed_filename
+
   if (is.null(out_folder)){
     print("output folder not specified")
     return("error")
@@ -347,64 +377,64 @@ prepare = function(parameters){
     dir.create(out_folder)
     print(c("folder created: ", out_folder))
   }
-  
+
 
   if (type != "hikr"){
-      if (is.null(parameters$input$hikr_filepath)){
+      if (is.null(in_hikr)){
         print("missing known dataset path for filter")
         return("error")
       }
 
-      hikrdata = read.csv(parameters$input$hikr_filepath, header = TRUE, sep = ",", stringsAsFactors = FALSE)
-      
+      hikrdata = read.csv(in_hikr, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+
       known_max_speed = vector()
       known_median_speed = vector()
       known_q3_speed = vector()
-      
+
       for(i in sort(unique(hikrdata$Segment.No))){
         quants=quantile(hikrdata$speed[hikrdata$Segment.No==i])
         known_max_speed = c(known_max_speed, quants[[5]])
         known_q3_speed = c(known_q3_speed, quants[[4]])
         known_median_speed = c(known_median_speed, quants[[3]])
       }
-      
+
       HikrValues = list(Q3max = quantile(known_max_speed, 0.75)[[1]],
                         whiskermax = boxplot(known_max_speed, plot=FALSE)$stats[5],
                         medmed = median(known_median_speed),
                         minQ3 = min(known_q3_speed))
       #HikrValues = list(Q3max = 5.869302,whiskermax = 7.490433,medmed = 3.02698,minQ3 = 2.448512)
   }
-  
-  AllData = read.csv(paste0(parameters$input$merged_filepath), header = TRUE, sep = ",", stringsAsFactors = FALSE)
-  
+
+  AllData = read.csv(paste0(in_folder,'/',in_name), header = TRUE, sep = ",", stringsAsFactors = FALSE)
+
   #Calculate walking slope values & set zero movement points to breaks
-  
+
   AllData=walkingSlope(AllData)
   AllData$OnBreak[AllData$distance==0]=1
-  
+
   #Tag any points with over 1km travel or 600m distance as a fixed break
   AllData$OnBreak[AllData$distance>=1000]=2
   AllData$OnBreak[AllData$duration>=600]=2
-  
+
   ##Get lengths of breaks in the data
   #breaklengths = findbreaks(AllData, getlengths = TRUE)
-  
+
   #Tag all breaks longer than minimum threshold
   AllData = findbreaks(AllData, getlengths = FALSE, minbreak = 30, speedcutoff = 10)
   #Save as new file
-  if (!is.null(parameters$output$optional$valid_breaks_filename)){
-    write.csv(AllData,paste0(out_folder,'/',parameters$output$optional$valid_breaks_filename,'.csv'), row.names = FALSE)
+  if (!is.null(valid_breaks)){
+    write.csv(AllData,paste0(out_folder,'/',valid_breaks,'.csv'), row.names = FALSE)
   }
   #Merge data into 50m intervals
   AllData50m = datamerge(AllData, 'distance', 50)
   #Ignore points under 50m
   AllData50m$OnBreak[AllData50m$distance <= 50] = 1
-  
+
   #Save as new file
-  if (!is.null(parameters$output$optional$combined_50_filename)){
-    write.csv(AllData50m,paste0(out_folder,'/',parameters$output$optional$combined_50_filename,'.csv'), row.names = FALSE)
+  if (!is.null(combo50)){
+    write.csv(AllData50m,paste0(out_folder,'/',combo50,'.csv'), row.names = FALSE)
   }
-  
+
   if (type=="hikr"){
     #Remove segments with mean speed above 10km/h
     removals=vector()
@@ -424,7 +454,7 @@ prepare = function(parameters){
     #Filter dataset to remove tracks which don't match known walking profile
     AllData50m = DataRemoval(AllData50m, HikrValues)
     AllData50mNoBreaks = subset(AllData50m, AllData50m$OnBreak==0)
-    
+
     #Loop to remove high speed / short points
     current_length = Inf
     while (length(AllData50mNoBreaks[,1])<current_length){
@@ -435,12 +465,15 @@ prepare = function(parameters){
       AllData50mNoBreaks = subset(AllData50m, AllData50m$OnBreak==0)
     }
   }
-  
 
-  if (!is.null(parameters$output$optional$output_breaks_filename)){
-    write.csv(AllData50m,paste0(out_folder,'/',parameters$output$optional$output_breaks_filename,'.csv'), row.names = FALSE)
+
+  if (!is.null(processed_breaks_name)){
+    write.csv(AllData50m,paste0(out_folder,'/',processed_breaks_name,'.csv'), row.names = FALSE)
   }
-  write.csv(AllData50mNoBreaks,paste0(out_folder,'/',parameters$output$output_filename,'.csv'), row.names = FALSE)
+  write.csv(AllData50mNoBreaks,paste0(out_folder,'/',processed_name,'.csv'), row.names = FALSE)
   return(AllData50mNoBreaks)
 }
 
+
+
+main()
