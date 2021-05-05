@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 main <- function(){
 
     args <- commandArgs(trailingOnly = TRUE)
