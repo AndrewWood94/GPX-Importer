@@ -21,9 +21,9 @@ Note: If replicating the methods in full, be aware that the ```find_breaks``` sc
 (~1 week on 2018 MacBook Air, 1.6 GHz Dual-Core Intel Core i5, 8 GB 2133 MHz LPDDR3)
 
 
-##Preparation
+## Preparation
 
-#### OS Terrain 5 DTM
+### OS Terrain 5 DTM
 
 Due to licensing requirements, the Digital Terrain Map containing elevation data required for calculating both walking and hill slope angles 
 is not available for public download and must be accessed separately. It is available under an Educational License from Digimap and should be 
@@ -54,7 +54,7 @@ The following NY tiles are sufficient to include all data for Scotland, however 
     07 17 27 37 47 
     06 16 26 36 
         
-#### Conda Environment
+### Conda Environment
 
 Create a conda environment and install python, qgis, click and pandas
 
@@ -77,7 +77,7 @@ Install this package locally:
 pip install .
 ```
 
-#### Config file
+### Config file
 
 The file config.yaml contained within this package is used as the configuration file
 for reading and importing the data, and should be edited to point to the correct file locations.
@@ -136,7 +136,7 @@ On MacOS: [environment_path]/QGIS.app/Contents/MacOS
 
 ## Replication
 
-#### GPS tracks:
+### GPS tracks:
 
 The list of Hikr tracks used can be found in Hikr_filepaths.json. 
 Note that this file can be reproduced by running the ```scrape``` script with 
@@ -146,11 +146,12 @@ website = https://www.hikr.org/region518/ped/?gps=1 in the config file
 scrape -c config.yaml
 ```
 
-The OSM tracks used are saved in the scotland.tar.xz file which should be unzipped. This is a duplicate of the planet.osm
-gpx file list for scotland which is available [here](http://zverik.openstreetmap.ru/gps/files/extracts/europe/great_britain)
-Alternatively, the OSM_Inscope folder can be used; this contains only the GPS tracks which are not filtered out during the process
+The OSM tracks used are saved in the scotland_osm.zip file which should be unzipped. 
 
-#### Importing Files:
+This is a copy of the planet.osm gpx file list for scotland which is available [here](http://zverik.openstreetmap.ru/gps/files/extracts/europe/great_britain),
+reduced to only include 'Identifiable' or 'Trackable' tracks, i.e. those which contain timestamps in the .gpx file.
+
+### Importing Files:
 
 The code to import the files is a modified version of the gpx_segment_importer
 QGIS plugin: https://github.com/SGroe/gpx-segment-importer
@@ -169,7 +170,7 @@ It is important to change the output file location or name between runs, as prev
 It is recommended that separate output folder are used for hikr and osm data, as they will need to be in separate folders
 at the Merge Files stage.
 
-#### Tagging Breakpoints:
+### Tagging Breakpoints:
 
 The ```find_breaks``` script will add an 'OnBreak' attribute to each gpkg file, using the methods outlined in the paper.  
 This script will also delete files which are clearly not walking tracks (median speed > 10km/h), 
@@ -179,7 +180,7 @@ or don't contain enough data to be useful (distance < 250m or duration < 2.5 min
 find_breaks -c config.yaml
 ```
 
-#### Merge files:
+### Merge files:
 
 The ```merge``` script takes all of the files in [output][gpkg_folder] 
 and combines them into a single file, [output][merged_filename], saved in [output][merged_folder].  
@@ -190,7 +191,7 @@ of the OSM dataset later on.
 merge_tracks -c config.yaml
 ```
 
-#### Terrain Calculation
+### Terrain Calculation
 
 The ```get_terrain``` script will calculate the elevation and slope values for each line segment from the OS terrain data.  
 It reads the [merged_name] .csv file in [merged_folder] and adds the following attributes:
