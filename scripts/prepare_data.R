@@ -5,17 +5,16 @@ main <- function(){
     args <- commandArgs(trailingOnly = TRUE)
     filename <- args[1]
 
-    list.of.packages <- c("yaml", "dplyr")
+    list.of.packages <- c("configr", "dplyr")
     new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
     if (length(new.packages)){
-      install.packages(new.packages)
+      install.packages(new.packages, repos = "http://cran.us.r-project.org")
     }
 
     suppressWarnings(suppressMessages(library(dplyr)))
     suppressWarnings(suppressMessages(library(configr)))
 
     parameters = read.config(file = filename)
-
     AllData50mNoBreaks = prepare(parameters)
 }
 
@@ -407,7 +406,7 @@ prepare = function(parameters){
       #HikrValues = list(Q3max = 5.869302,whiskermax = 7.490433,medmed = 3.02698,minQ3 = 2.448512)
   }
 
-  AllData = read.csv(paste0(in_folder,'/',in_name), header = TRUE, sep = ",", stringsAsFactors = FALSE)
+  AllData = read.csv(paste0(in_folder,'/',in_file), header = TRUE, sep = ",", stringsAsFactors = FALSE)
 
   #Calculate walking slope values & set zero movement points to breaks
 

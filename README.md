@@ -1,21 +1,21 @@
 This repo provides the methods required to recreate the dataset of walking and hiking tracks in the walking speeds paper.
 
-- Preparation
-    - OS Terrain 5 DTM
-    - Conda Environment
-    - Config file
-- Replication
-    - GPS tracks
-    - Import files
-    - Tag breakpoints
-    - Merge files
-    - Terrain Calculation
-    - Filter and Merge Tracks
+- [Preparation](#preparation)
+    - [OS Terrain 5 DTM](#os-terrain-5-dtm)
+    - [Conda Environment](#conda-environment)
+    - [Config file](#config-file)
+- [Replication](#replication)
+    - [GPS tracks](#gps-tracks)
+    - [Importing files](#importing-files)
+    - [Tagging breakpoints](#tagging-breakpoints)
+    - [Merging files](#merging-files)
+    - [Terrain Calculation](#terrain-calculation)
+    - [Data combination & filtering](#data-combination--filtering)
     
- For replication of the methods used in the paper, the full guide should be followed, 
+For replication of the methods used in the paper, the full guide should be followed, 
 however to simply recreate the dataset of filtered walking tracks you should jump 
-straight to the Terrain Calculation using the Hikr.csv and OSM.csv files as inputs,
-after the Preparation section
+straight to the [Terrain Calculation](#terrain-calculation) using the Hikr.csv and OSM.csv files as inputs,
+after completing the [Preparation](#preparation)
  
 Note: If replicating the methods in full, be aware that the ```find_breaks``` script takes a very long time to run. 
 (~1 week on 2018 MacBook Air, 1.6 GHz Dual-Core Intel Core i5, 8 GB 2133 MHz LPDDR3)
@@ -56,22 +56,24 @@ The following NY tiles are sufficient to include all data for Scotland, however 
         
 ### Conda Environment
 
-Create a conda environment and install python, qgis, click and pandas
+Create a conda environment and install python, QGIS, R, click and pandas.
+If QGIS or R are already present on the system these can be left out
 
 ```Bash
 conda create -n [environment_name] python=3.8
 conda activate [environment_name]
 conda install -c conda-forge qgis=3.18.2
+conda install -c conda-forge r=4.0
 conda install -c conda-forge click=7.1.2
 conda install -c conda-forge pandas=1.2.4
 ```
 
-If recreating hikr data from scratch, scrapy is also required:
+If recreating data from scratch, scrapy is also required:
 ```Bash
 conda install -c conda-forge scrapy=2.1.4
 ```
 
-Install this package locally:
+Navigate to the downloaded repository and install this package locally:
 
 ```Bash
 pip install .
@@ -81,13 +83,23 @@ pip install .
 
 The file config.yaml contained within this package is used as the configuration file
 for reading and importing the data, and should be edited to point to the correct file locations.
-The scripts which each variable is used in are shown below. 
+Descriptions of each variable, and the scripts in which they are used are shown below. 
 
-- **qgis_path** : The path of the qgis executable within the conda environment  
-On MacOS: [environment_path]/QGIS.app/Contents/MacOS
-- **filetype** : should be set to either *osm* or *hikr* depending on which data type is being read 
+- **qgis_path** :  
+The path of the qgis executable within the conda environment  
+On MacOS: [environment_path]/QGIS.app/Contents/MacOS  
+```run_gpx_importer```
+```find_breaks```
+```merge_tracks```
+```get_terrain```
+
+- **filetype** :  
+should be set to either *osm* or *hikr* depending on which data type is being read  
+```run_gpx_importer```
+```prepare_data.R```
 - **data**
-  - **os_grid_folder** : Folder containing OS National grid files 
+  - **os_grid_folder** :  
+  Folder containing OS National grid files 
     ```
     .
     ├── os-grids
@@ -95,15 +107,27 @@ On MacOS: [environment_path]/QGIS.app/Contents/MacOS
         └── 100km_grid_region.shp
          ⋮
     ```
+    ```run_gpx_importer```
   - **GPS_files**
     - **hikr**
-      - **website** : address of Hikr results to parse for GPS data  
-      - **folder** : Location of json file containing hikr data links
-      - **name** : Filename of json file containing hikr data links
+      - **website** :  
+      address of Hikr results to parse for GPS data  
+      ```scrape```  
+      - **folder** : 
+      Location of json file containing hikr data links  
+      ```scrape```
+      ```run_gpx_importer``` 
+      - **name** :  
+      Filename of json file containing hikr data links  
+      ```scrape```
+      ```run_gpx_importer``` 
     - **osm**
-      - **folder** : Location of OpenStreetMap tracks to be read
+      - **folder** :  
+      Location of OpenStreetMap tracks to be read  
+      ```run_gpx_importer``` 
   - **terrain**
-    - **DTM_folder** : Top level folder containing DTM files e.g 
+    - **DTM_folder** :  
+    Top level folder containing DTM files e.g  
         ```
         .
         ├── DTM_folder
@@ -116,23 +140,56 @@ On MacOS: [environment_path]/QGIS.app/Contents/MacOS
             └── ht
              ⋮
         ```
-    - **DTM_resolution** : Resolution of DTM data (should be set to 5)  
-  - **processed_hikr_filepath** : If type = osm, give filepath of processed hikr data to use for filtering in ```PrepareData.R``` script
-
+        ```get_terrain```
+    - **DTM_resolution** :  
+    Resolution of DTM data (should be set to 5)  
+    ```get_terrain```  
+  - **processed_hikr_filepath** :  
+  If ```type``` = osm, give filepath of processed hikr data to use for filtering  
+  ```prepare_data.R```
 - **conditions**
-  - **data_filter** : Whether to run initial filter on OSM data to remove files which are not in scope (not required but speeds up processing), should be set to False if already filtered dataset
-  - **in_scope_folder** : location to copy in-scope .gpx files 
+  - **data_filter** :  
+  Whether to run initial filter on OSM data to remove files which are not in scope 
+  (not required but speeds up processing), should be set to False if already filtered dataset  
+  ```run_gpx_importer```
+  - **in_scope_folder** :  
+  location to copy in-scope .gpx files  
+  ```run_gpx_importer```
 - **output** 
-  - **gpkg_folder** : Location to save gpkg output files 
-  - **name_root** : Name stem for gpkg files, indexes are automatically added for each new track & segment, e.g Data0_001 
-  - **merged_folder** : location to save merged .gpkg and .csv files 
-  - **merged_name** : file name to save merged .gpkg and .csv files
-  - **processed_folder** : destination folder for processed & filtered output files
+  - **gpkg_folder** :  
+  Location to save gpkg output files  
+  ```run_gpx_importer```
+  ```find_breaks```
+  ```merge_tracks```
+  - **name_root** :  
+  Name stem for gpkg files, indexes are automatically added for each new track & segment, e.g Data0_001   
+  ```run_gpx_importer```
+  - **merged_folder** :  
+  location to save merged .gpkg and .csv files  
+  ```merge_tracks```
+  ```get_terrain```
+  ```prepare_data.R``` 
+  - **merged_name** :  
+  file name to save merged .gpkg and .csv files  
+  ```merge_tracks```
+  ```get_terrain```
+  ```prepare_data.R```
+  - **processed_folder** :  
+  destination folder for processed & filtered output files  
+  ```prepare_data.R```
   - **optional**
-    - **valid_breaks_filename** : filename for dataset with only valid breaks (>30 seconds) tagged
-    - **combined_50_filename** : filename for dataset with data combined into 50m segments 
-    - **processed_breaks_filename** : filename for processed & filtered dataset with breaks tagged
-  - **processed_filename** : filename for processed & filtered dataset with breaks/non-walking sections removed
+    - **valid_breaks_filename** :  
+    filename for dataset with only valid breaks (>30 seconds) tagged  
+    ```prepare_data.R```
+    - **combined_50_filename** :  
+    filename for dataset with data combined into 50m segments   
+    ```prepare_data.R```
+    - **processed_breaks_filename** :  
+    filename for processed & filtered dataset with breaks tagged  
+    ```prepare_data.R```
+  - **processed_filename** :  
+  filename for processed & filtered dataset with breaks/non-walking sections removed  
+  ```prepare_data.R```
 
 ## Replication
 
@@ -180,7 +237,7 @@ or don't contain enough data to be useful (distance < 250m or duration < 2.5 min
 find_breaks -c config.yaml
 ```
 
-### Merge files:
+### Merging files:
 
 The ```merge``` script takes all of the files in [output][gpkg_folder] 
 and combines them into a single file, [output][merged_filename], saved in [output][merged_folder].  
@@ -209,14 +266,14 @@ get_terrain -c config.yaml
 
 ### Data combination & filtering
 
-The ```PrepareData.R``` script reads the ```[merged_filename]``` .csv and 
+The ```prepare_data.R``` script reads the ```[merged_filename]``` .csv and 
 filters / combines the data for use in modelling. 
 This script must first be run with ```[filetype] = hikr```. The ```[processed_filename]``` output of this 
 should then be set as the the ```[processed_hikr_filepath]```  input when running with ```[filetype] = osm```, so that 
 the OSM data can be filtered to remove any non-walking tracks or segments.
 
 ```bash
-Rscript PrepareData.R config.yaml
+prepare_data.R config.yaml
 ```
 
 The outputs of these can be merged together
