@@ -206,7 +206,7 @@ If desired, this file can be reproduced by running the ```scrape``` script with
 scrape -c config.yaml
 ```
 
-The OpenStreetMap (OSM) tracks used are saved in the scotland_osm.zip file which should be unzipped. This is a copy of 
+The OpenStreetMap (OSM) tracks used are saved in the scotland-osm-tracks.zip file which should be unzipped. This is a copy of 
 the planet.osm gpx file list for Scotland which is available [here](http://zverik.openstreetmap.ru/gps/files/extracts/europe/great_britain),
 reduced to only include 'Identifiable' or 'Trackable' tracks, i.e. those which contain timestamps in the .gpx file.
 
