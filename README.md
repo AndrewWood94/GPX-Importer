@@ -78,8 +78,8 @@ Navigate to the downloaded repository and install this package locally:
 ```Bash
 cd /where/the/package/lives/WalkingSpeedsPaper
 pip install .
-# alternatively simply: pip install /where/the/package/lives/WalkingSpeedsPaper
 
+#alternatively: pip install /where/the/package/lives/WalkingSpeedsPaper
 ```
 
 ### Config file
@@ -204,6 +204,8 @@ If desired, this file can be reproduced by running the ```scrape``` script with
 
 ```Bash
 scrape -c config.yaml
+
+#windows: python scripts/scrape -c config.yaml
 ```
 
 The OpenStreetMap (OSM) tracks used are saved in the scotland-osm-tracks.zip file which should be unzipped. This is a copy of 
@@ -222,6 +224,8 @@ the input location in future for faster processing.
 
 ```Bash
 run_gpx_importer -c config.yaml
+
+#windows: python scripts/run_gpx_importer -c config.yaml
 ```
 
 It is important to change the output file location or name between runs, as previous tracks will be overwritten.
@@ -236,6 +240,8 @@ or don't contain enough data to be useful (distance < 250m or duration < 2.5 min
 
 ```Bash
 find_breaks -c config.yaml
+
+#windows: python scripts/find_breaks -c config.yaml
 ```
 
 ### Merging files:
@@ -247,6 +253,8 @@ of the OSM dataset later on.
 
 ```Bash
 merge_tracks -c config.yaml
+
+#windows: python scripts/merge_tracks -c config.yaml
 ```
 
 ### Terrain Calculation
@@ -263,6 +271,8 @@ It takes the [merged_name] .csv file in [merged_folder] and adds the following a
 
 ```Bash
 get_terrain -c config.yaml
+
+#windows: python scripts/get_terrain -c config.yaml
 ```
 
 ### Data combination & filtering
@@ -275,6 +285,8 @@ the OSM data can be filtered to remove any non-walking tracks or segments.
 
 ```bash
 prepare_data.R config.yaml
+
+#windows: Rscript scripts/prepare_data.R config.yaml
 ```
 
 The outputs of these can be merged together in R to produce the dataset used for modelling walking speeds.
