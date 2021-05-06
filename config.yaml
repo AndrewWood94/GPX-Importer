@@ -1,27 +1,27 @@
 
 #folder containing QGIS executable
-qgis_path: conda_environment/QGIS.app/Contents/MacOS
+qgis_path: /path/to/conda/environment/QGIS.app/Contents/MacOS
 #filetype should be either Hikr or OSM
-filetype:
+filetype: hikr
 data:
   #folder containing 10km_grid_region.shp & 100km_grid_region.shp
-  os_grid_folder: os-grids
+  os_grid_folder: data/os-grids
   GPS_files:
     hikr:
       #site for web scraper to find gps tracks
       website: https://www.hikr.org/region518/ped/?gps=1
       #location of json file containing hikr data links
-      folder: .
+      folder: data
       name: hikr_filepaths
     osm:
       #folder containing OpenStreetMap tracks to be read
-      folder: gpx-planet-2013-04-09
+      folder: data/scotland-osm-tracks
   terrain:
-    #folder containing DTM files, split by national grid squares e.g DTM_folder/ht/HT93NE.asc
-    DTM_folder:
+    #path to folder containing DTM files, split by national grid squares e.g DTM_folder/ht/HT93NE.asc
+    DTM_folder: /path/to/DTM/folder/
     DTM_resolution: 5
-  #If type = OSM, give location of fully processed hikr data to use in PrepareData script
-  processed_hikr_filepath:
+  #If type = OSM, give location of fully processed hikr data .csv to use in PrepareData script
+  processed_hikr_filepath: /path/to/processed/hikr.csv
 conditions:
   #run initial filter on OSM data to remove files which are not in region (not required but speeds up processing)
   #should be set to False if already filtered dataset

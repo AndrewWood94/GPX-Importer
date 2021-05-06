@@ -14,8 +14,8 @@ This repo provides the methods required to recreate the dataset of walking and h
     
 For replication of the methods used in the paper, the full guide should be followed, 
 however to simply recreate the dataset of filtered walking tracks you should jump 
-straight to the [Terrain Calculation](#terrain-calculation) using the Hikr.csv and OSM.csv files as inputs,
-after completing the [Preparation](#preparation)
+straight to the [Terrain Calculation](#terrain-calculation) using the Hikr.csv and unzipped OSM.csv files in the data folder as inputs,
+after completing the [Preparation.](#preparation)
  
 Note: If replicating the methods in full, be aware that the ```find_breaks``` script takes a very long time to run. 
 (~1 week on 2018 MacBook Air, 1.6 GHz Dual-Core Intel Core i5, 8 GB 2133 MHz LPDDR3)
@@ -26,7 +26,7 @@ Note: If replicating the methods in full, be aware that the ```find_breaks``` sc
 ### OS Terrain 5 DTM
 
 Due to licensing requirements, the Digital Terrain Map containing elevation data required for calculating both walking and hill slope angles 
-is not available for public download and must be accessed separately. It is available under an Educational License from Digimap and should be 
+is not available for public download and must be accessed separately. It is available under an Educational License from Digimap and can be 
 accessed using the [Bulk Download Request form](https://goo.gl/FxyyFs),
 with the following criteria:
 
@@ -76,18 +76,21 @@ conda install -c conda-forge scrapy=2.1.4
 Navigate to the downloaded repository and install this package locally:
 
 ```Bash
+cd /where/the/package/lives/WalkingSpeedsPaper
 pip install .
+# alternatively simply: pip install /where/the/package/lives/WalkingSpeedsPaper
+
 ```
 
 ### Config file
 
-The file config.yaml contained within this package is used as the configuration file
+The file config.yaml contained within this repository is used as the configuration file
 for reading and importing the data, and should be edited to point to the correct file locations.
 Descriptions of each variable, and the scripts in which they are used are shown below. 
 
 - **qgis_path** :  
 The path of the qgis executable within the conda environment  
-On MacOS: [environment_path]/QGIS.app/Contents/MacOS  
+On MacOS: /path/to/conda/environemnt/QGIS.app/Contents/MacOS  
 ```run_gpx_importer```
 ```find_breaks```
 ```merge_tracks```
@@ -99,7 +102,7 @@ should be set to either *osm* or *hikr* depending on which data type is being re
 ```prepare_data.R```
 - **data**
   - **os_grid_folder** :  
-  Folder containing OS National grid files 
+  Path to folder containing OS National grid files (data/os-grids)
     ```
     .
     ├── os-grids
@@ -111,10 +114,10 @@ should be set to either *osm* or *hikr* depending on which data type is being re
   - **GPS_files**
     - **hikr**
       - **website** :  
-      address of Hikr results to parse for GPS data  
+      Address of Hikr results to parse for GPS data  
       ```scrape```  
       - **folder** : 
-      Location of json file containing hikr data links  
+      Path to location of json file containing hikr data links  
       ```scrape```
       ```run_gpx_importer``` 
       - **name** :  
@@ -123,11 +126,11 @@ should be set to either *osm* or *hikr* depending on which data type is being re
       ```run_gpx_importer``` 
     - **osm**
       - **folder** :  
-      Location of OpenStreetMap tracks to be read  
+      Path to location of OpenStreetMap tracks to be read  
       ```run_gpx_importer``` 
   - **terrain**
     - **DTM_folder** :  
-    Top level folder containing DTM files e.g  
+    Path to top level folder containing DTM files e.g  
         ```
         .
         ├── DTM_folder
@@ -145,78 +148,76 @@ should be set to either *osm* or *hikr* depending on which data type is being re
     Resolution of DTM data (should be set to 5)  
     ```get_terrain```  
   - **processed_hikr_filepath** :  
-  If ```type``` = osm, give filepath of processed hikr data to use for filtering  
+  If ```type``` = osm, give filepath of processed hikr data to use for filtering tracks in ```prepare_data.R```  
   ```prepare_data.R```
 - **conditions**
   - **data_filter** :  
   Whether to run initial filter on OSM data to remove files which are not in scope 
-  (not required but speeds up processing), should be set to False if already filtered dataset  
+  (not required but speeds up processing), default is True, should be set to False if using pre-filtered dataset  
   ```run_gpx_importer```
   - **in_scope_folder** :  
-  location to copy in-scope .gpx files  
+  Location to copy & save in-scope .gpx files  
   ```run_gpx_importer```
 - **output** 
   - **gpkg_folder** :  
-  Location to save gpkg output files  
+  Location to save .gpkg output files  
   ```run_gpx_importer```
   ```find_breaks```
   ```merge_tracks```
   - **name_root** :  
-  Name stem for gpkg files, indexes are automatically added for each new track & segment, e.g Data0_001   
+  Name stem for .gpkg files, indexes are automatically added for each new track & segment, e.g [name_root]0_001   
   ```run_gpx_importer```
   - **merged_folder** :  
-  location to save merged .gpkg and .csv files  
+  Location to save merged .gpkg and .csv files  
   ```merge_tracks```
   ```get_terrain```
   ```prepare_data.R``` 
   - **merged_name** :  
-  file name to save merged .gpkg and .csv files  
+  File name to save merged .gpkg and .csv files  
   ```merge_tracks```
   ```get_terrain```
   ```prepare_data.R```
   - **processed_folder** :  
-  destination folder for processed & filtered output files  
+  Destination folder for processed & filtered output files  
   ```prepare_data.R```
   - **optional**
     - **valid_breaks_filename** :  
-    filename for dataset with only valid breaks (>30 seconds) tagged  
+    Filename for dataset with only valid breaks (>30 seconds) tagged  
     ```prepare_data.R```
     - **combined_50_filename** :  
-    filename for dataset with data combined into 50m segments   
+    Filename for dataset with data combined into 50m segments   
     ```prepare_data.R```
     - **processed_breaks_filename** :  
-    filename for processed & filtered dataset with breaks tagged  
+    Filename for processed & filtered dataset with breaks tagged  
     ```prepare_data.R```
   - **processed_filename** :  
-  filename for processed & filtered dataset with breaks/non-walking sections removed  
+  Filename for processed & filtered dataset with breaks/non-walking sections removed  
   ```prepare_data.R```
 
 ## Replication
 
 ### GPS tracks:
 
-The list of Hikr tracks used can be found in Hikr_filepaths.json. 
-Note that this file can be reproduced by running the ```scrape``` script with 
-website = https://www.hikr.org/region518/ped/?gps=1 in the config file
+The list of Hikr tracks used can be found in hikr_filepaths.json file in the data folder.
+If desired, this file can be reproduced by running the ```scrape``` script with 
+[website] = https://www.hikr.org/region518/ped/?gps=1 in the config file.
 
 ```Bash
 scrape -c config.yaml
 ```
 
-The OSM tracks used are saved in the scotland_osm.zip file which should be unzipped. 
-
-This is a copy of the planet.osm gpx file list for scotland which is available [here](http://zverik.openstreetmap.ru/gps/files/extracts/europe/great_britain),
+The OpenStreetMap (OSM) tracks used are saved in the scotland_osm.zip file which should be unzipped. This is a copy of 
+the planet.osm gpx file list for Scotland which is available [here](http://zverik.openstreetmap.ru/gps/files/extracts/europe/great_britain),
 reduced to only include 'Identifiable' or 'Trackable' tracks, i.e. those which contain timestamps in the .gpx file.
 
 ### Importing Files:
 
-The code to import the files is a modified version of the gpx_segment_importer
-QGIS plugin: https://github.com/SGroe/gpx-segment-importer
-
+The code to import the files is a modified version of the [gpx_segment_importer
+QGIS plugin.](https://github.com/SGroe/gpx-segment-importer)  
 The ```run_gpx_importer``` script will the .json file ([filetype] = hikr), or folder ([filetype] = osm), and import gpx files as .gpkg files.
 These files are saved to the config [output][gpkg_folder].
 
-If running with osm data and filter = True, this will also save all of the valid gpx files to in_scope_folder, which can be used as
+If running with [filetype] = osm and [data_filter] = True, this will also save all of the valid gpx files to [in_scope_folder], which can be used as
 the input location in future for faster processing.
 
 ```Bash
@@ -224,7 +225,7 @@ run_gpx_importer -c config.yaml
 ```
 
 It is important to change the output file location or name between runs, as previous tracks will be overwritten.
-It is recommended that separate output folder are used for hikr and osm data, as they will need to be in separate folders
+It is recommended that separate output folder are used for Hikr and OSM data, as they will need to be in separate folders
 at the Merge Files stage.
 
 ### Tagging Breakpoints:
@@ -241,7 +242,7 @@ find_breaks -c config.yaml
 
 The ```merge``` script takes all of the files in [output][gpkg_folder] 
 and combines them into a single file, [output][merged_filename], saved in [output][merged_folder].  
-It is important to merge hikr and OSM files separately, as the merged hikr tracks are used to filter non-walking tracks out 
+It is important to merge Hikr and OSM files separately, as the merged Hikr tracks are used to filter non-walking tracks out 
 of the OSM dataset later on.
 
 ```Bash
@@ -251,7 +252,7 @@ merge_tracks -c config.yaml
 ### Terrain Calculation
 
 The ```get_terrain``` script will calculate the elevation and slope values for each line segment from the OS terrain data.  
-It reads the [merged_name] .csv file in [merged_folder] and adds the following attributes:
+It takes the [merged_name] .csv file in [merged_folder] and adds the following attributes:
 - a_OS height
 - b_OS height
 - OS height_diff
@@ -266,20 +267,20 @@ get_terrain -c config.yaml
 
 ### Data combination & filtering
 
-The ```prepare_data.R``` script reads the ```[merged_filename]``` .csv and 
-filters / combines the data for use in modelling. 
-This script must first be run with ```[filetype] = hikr```. The ```[processed_filename]``` output of this 
-should then be set as the the ```[processed_hikr_filepath]```  input when running with ```[filetype] = osm```, so that 
+The ```prepare_data.R``` script reads the [merged_filename] .csv and 
+filters/combines the data for use in modelling. 
+This script must first be run with [filetype] = hikr. The [processed_filename] output of this 
+should then be set as the the [processed_hikr_filepath]  input when running with [filetype] = osm, so that 
 the OSM data can be filtered to remove any non-walking tracks or segments.
 
 ```bash
 prepare_data.R config.yaml
 ```
 
-The outputs of these can be merged together
+The outputs of these can be merged together in R to produce the dataset used for modelling walking speeds.
 
 ```R
-> combined_dataset = rbind(hikr_output, osm_output)
-```
+#R script 
 
-This combined dataset can then be used to model walking speeds
+> combined_dataset = rbind(hikr_output_file, osm_output_file)
+```
