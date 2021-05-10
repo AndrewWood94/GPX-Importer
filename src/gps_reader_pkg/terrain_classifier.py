@@ -1,7 +1,56 @@
 from qgis.core import QgsPointXY, QgsRectangle, QgsRasterLayer
-#import geopandas as gpd
 import math
 import os
+
+
+def get_tile_name(x, y):
+    """
+    Find which 5km National grid square contains the given point
+    :param x: Easting
+    :param y: Northing
+    :return: tile_name: 5x5 km nation grid tile
+    """
+
+    # Ensure grid boundaries are correct
+    if y % 5000 == 0:
+        y = y - 1
+
+    # Get first letter
+    if (y > 1000000):
+        first_char = "H"
+        y -= (1000000)
+    elif (y > 500000):
+        first_char = "N"
+        y -= 500000
+    else:
+        if (x >= 500000):
+            first_char = "T"
+            x -= 500000
+        else:
+            first_char = "S"
+
+    # Get  second letter
+    col_offset = math.floor(x / 100000)
+    row_offset = math.floor(y / 100000)
+    val = 86 + col_offset - (row_offset * 5)
+    if (val < 74):
+        val = val - 1  # correct for missing 'i' for values below 'j'
+    second_char = chr(val)
+
+    # Get 10k*10k square
+    x = x % 100000
+    y = y % 100000
+    col_name = math.floor(x / 10000)
+    row_name = math.floor(y / 10000)
+
+    # Get 5k*5k quadrant
+    x = x % 10000
+    y = y % 10000
+    vertical_quadrant = "N" if y > 5000 else "S"
+    horizontal_quadrant = "E" if x >= 5000 else "W"
+
+    tile_name = first_char + second_char + str(col_name) + str(row_name) + vertical_quadrant + horizontal_quadrant
+    return tile_name
 
 
 class TerrainClassifier:
@@ -14,55 +63,6 @@ class TerrainClassifier:
         self.elev_layer = None
         self.elev_boundaries = QgsRectangle(0, 0, 0, 0)
         self.resolution = resolution
-
-    def get_tile_name(self, x, y):
-        """
-        Find which 5km National grid square contains the given point
-        :param x: Easting
-        :param y: Northing
-        :return: tile_name: 5x5 km nation grid tile
-        """
-
-        # Ensure grid boundaries are correct
-        if y % 5000 == 0:
-            y = y - 1
-
-        # Get first letter
-        if (y > 1000000):
-            first_char = "H"
-            y -= (1000000)
-        elif (y > 500000):
-            first_char = "N"
-            y -= 500000
-        else:
-            if (x >= 500000):
-                first_char = "T"
-                x -= 500000
-            else:
-                first_char = "S"
-
-        # Get  second letter
-        col_offset = math.floor(x / 100000)
-        row_offset = math.floor(y / 100000)
-        val = 86 + col_offset - (row_offset * 5)
-        if (val < 74):
-            val = val - 1  # correct for missing 'i' for values below 'j'
-        second_char = chr(val)
-
-        # Get 10k*10k square
-        x = x % 100000
-        y = y % 100000
-        col_name = math.floor(x / 10000)
-        row_name = math.floor(y / 10000)
-
-        # Get 5k*5k quadrant
-        x = x % 10000
-        y = y % 10000
-        vertical_quadrant = "N" if y > 5000 else "S"
-        horizontal_quadrant = "E" if x >= 5000 else "W"
-
-        tile_name = first_char + second_char + str(col_name) + str(row_name) + vertical_quadrant + horizontal_quadrant
-        return tile_name
 
     def get_slope_coordinates(self, projectedPoint):
         """
@@ -103,7 +103,7 @@ class TerrainClassifier:
 
         """Elevation/Slope Classification"""
 
-        tile_name = self.get_tile_name(x, y)
+        tile_name = get_tile_name(x, y)
 
         if not self.elev_boundaries.contains(trackpoint):
             elev_path = self.data_file_path + "/" + tile_name[0:2] + "/" + tile_name + ".asc"
@@ -125,7 +125,7 @@ class TerrainClassifier:
             if self.elev_boundaries.contains(slope_coordinates[key]):
                 elevation_array[key] = self.elev_layer.dataProvider().sample(slope_coordinates[key], 1)[0]
             else:
-                dummy_tile_name = self.get_tile_name(slope_coordinates[key][0], slope_coordinates[key][1])
+                dummy_tile_name = get_tile_name(slope_coordinates[key][0], slope_coordinates[key][1])
                 dummy_elev_path = self.data_file_path + "/" + dummy_tile_name[
                                                               0:2] + "/" + dummy_tile_name + ".asc"
                 if os.path.isfile(dummy_elev_path):

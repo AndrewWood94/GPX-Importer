@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+#Script to filter walking gps tracks and combine into 50m segments for use in modelling
+
 main <- function(){
 
     args <- commandArgs(trailingOnly = TRUE)
@@ -203,6 +205,7 @@ datamerge=function(df,type, condition, terrain = list()){
 }
 
 savePoint = function(df, variables){
+  #Save each feature in datamerge funtion
   if(variables$duration >0){
     k = variables$fid
     df[k,]$WKT = variables$wkt
@@ -359,6 +362,7 @@ finddists = function(df, getlengths, mindist=NULL){
 }
 
 prepare = function(parameters){
+  #Process & filter merged csv track to remove non valid sections
 
   type = tolower(parameters$filetype)
   in_folder = parameters$input$merged_folder
