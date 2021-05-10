@@ -98,8 +98,8 @@ class TerrainClassifier:
         :param trackpoint:
         :return:
         """
-        x = trackpoint.x()
-        y = trackpoint.y()
+        x = trackpoint[0]
+        y = trackpoint[1]
 
         """Elevation/Slope Classification"""
 
