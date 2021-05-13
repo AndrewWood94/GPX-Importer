@@ -13,9 +13,9 @@ This repo provides the methods required to recreate the dataset of walking and h
     - [Data combination & filtering](#data-combination--filtering)
     
 For replication of the methods used in the paper, the full guide should be followed, 
-however to simply recreate the dataset of filtered walking tracks you should jump 
-straight to the [Terrain Calculation](#terrain-calculation) using the Hikr.csv and unzipped OSM.csv files in the data folder as inputs,
-after completing the [Preparation.](#preparation)
+however to simply recreate the dataset of filtered walking tracks you should follow the guide to recreate the Hikr data, 
+then jump straight to the [Terrain Calculation](#terrain-calculation) using the unzipped OSM.csv files in the data folder as inputs,
+after completing the [Preparation](#preparation). (Hikr data cannot be provided directly due to copyright).
  
 Note: If replicating the methods in full, be aware that the ```find_breaks``` script takes a very long time to run. 
 (~1 week on 2018 MacBook Air, 1.6 GHz Dual-Core Intel Core i5, 8 GB 2133 MHz LPDDR3)

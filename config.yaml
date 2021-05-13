@@ -1,6 +1,6 @@
 
 #folder containing QGIS executable
-qgis_path: /path/to/conda/environment/QGIS.app/Contents/MacOS
+qgis_path: /Users/Andrew/miniconda3/envs/pkg_test/QGIS.app/Contents/MacOS
 #filetype should be either Hikr or OSM
 filetype: hikr
 data:
@@ -18,7 +18,7 @@ data:
       folder: data/scotland-osm-tracks
   terrain:
     #path to folder containing DTM files, split by national grid squares e.g DTM_folder/ht/HT93NE.asc
-    DTM_folder: /path/to/DTM/folder/
+    DTM_folder: /Users/Andrew/Documents/QGIS Stuff/friction map test/
     DTM_resolution: 5
   #If type = OSM, give location of fully processed hikr data .csv to use in PrepareData script
   processed_hikr_filepath: /path/to/processed/hikr.csv
@@ -34,9 +34,9 @@ output:
   #Name stem for gpkg files, indexes are automatically added for each new track & segment, e.g Data0_001
   name_root:
   #location to save merged .gpkg and .csv files
-  merged_folder:
+  merged_folder: /Users/Andrew/PycharmProjects/GPX-Importer/data/
   #file name to save merged .gpkg and .csv files
-  merged_name:
+  merged_name: Hikr
   #destination folder for fully processed output files
   processed_folder:
   optional:
