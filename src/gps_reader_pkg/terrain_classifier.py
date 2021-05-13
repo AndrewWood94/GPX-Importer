@@ -64,18 +64,19 @@ class TerrainClassifier:
         self.elev_boundaries = QgsRectangle(0, 0, 0, 0)
         self.resolution = resolution
 
-    def get_slope_coordinates(self, projectedPoint):
+    def get_slope_coordinates(self, x, y):
         """
         Return coordinates required to calculate slope using quadratic surface method
         i.e. given point +-resolution distance in compass directions
-        :param projectedPoint: Point to calculate surface at
+        :param x: x coordinate of point to calculate slope at
+        :param y: y coordinate of point to calculate slope at
         :return: coordinate_dict: dictionary of ['N','S','E','W'] & coordinates at each point
         """
         coordinate_dict = {}
-        coordinate_dict['N'] = QgsPointXY(projectedPoint.x(), projectedPoint.y() + self.resolution)
-        coordinate_dict['S'] = QgsPointXY(projectedPoint.x(), projectedPoint.y() - self.resolution)
-        coordinate_dict['E'] = QgsPointXY(projectedPoint.x() + self.resolution, projectedPoint.y())
-        coordinate_dict['W'] = QgsPointXY(projectedPoint.x() - self.resolution, projectedPoint.y())
+        coordinate_dict['N'] = QgsPointXY(x, y + self.resolution)
+        coordinate_dict['S'] = QgsPointXY(x, y - self.resolution)
+        coordinate_dict['E'] = QgsPointXY(x + self.resolution, y)
+        coordinate_dict['W'] = QgsPointXY(x - self.resolution, y)
         return coordinate_dict
 
     def calculate_slope(self, elevation_array, degrees=True):
@@ -96,16 +97,19 @@ class TerrainClassifier:
         """
         Calculate elevation value and hill slope for a given point using OS data
         :param trackpoint:
-        :return:
+        :return: elevation_value
+        :return: slope_value
         """
         x = trackpoint[0]
         y = trackpoint[1]
 
+
         """Elevation/Slope Classification"""
 
         tile_name = get_tile_name(x, y)
+        point = QgsPointXY(x, y)
 
-        if not self.elev_boundaries.contains(trackpoint):
+        if not self.elev_boundaries.contains(point):
             elev_path = self.data_file_path + "/" + tile_name[0:2] + "/" + tile_name + ".asc"
             if os.path.isfile(elev_path):
                 self.elev_layer = QgsRasterLayer(elev_path)
@@ -115,11 +119,12 @@ class TerrainClassifier:
                 self.elev_layer = None
 
         if self.elev_layer is not None:
-            elevation_value = self.elev_layer.dataProvider().sample(trackpoint, 1)[0]
+            elevation_value = self.elev_layer.dataProvider().sample(point, 1)[0]
         else:
             elevation_value = float('NaN')
-        slope_coordinates = self.get_slope_coordinates(trackpoint)
 
+        slope_coordinates = self.get_slope_coordinates(x, y)
+       
         elevation_array = {}
         for key in slope_coordinates:
             if self.elev_boundaries.contains(slope_coordinates[key]):
