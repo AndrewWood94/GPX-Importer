@@ -70,7 +70,7 @@ conda install -c conda-forge pandas=1.2.4
 
 If recreating data from scratch, scrapy is also required:
 ```Bash
-conda install -c conda-forge scrapy=2.1.4
+conda install -c conda-forge scrapy=2.4.1
 ```
 
 Navigate to the downloaded repository and install this package locally:
@@ -91,6 +91,7 @@ Descriptions of each variable, and the scripts in which they are used are shown 
 - **qgis_path** :  
 The path of the qgis executable within the conda environment  
 On MacOS: /path/to/conda/environemnt/QGIS.app/Contents/MacOS  
+On windows: /path/to/conda/environemnt/QGIS.app/Library/bin
 ```run_gpx_importer```
 ```find_breaks```
 ```merge_tracks```
