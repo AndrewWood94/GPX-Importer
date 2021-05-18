@@ -5,6 +5,7 @@ Script to run breakfinding method on gpkg file folder
 from gps_reader_pkg.break_finder import BreakFinder
 from gps_reader_pkg.config import Config
 from gps_reader_pkg.qgis_app_init import QgisSetup
+from gps_reader_pkg.folder_methods import cleanup
 
 import os
 import sqlite3
@@ -56,10 +57,9 @@ def main(config):
         conn.close()
         if not future.result()[1]:
             os.remove(completed_file)
-        if os.path.isfile(completed_file + '-shm'): os.remove(completed_file + '-shm')
-        if os.path.isfile(completed_file + '-wal'): os.remove(completed_file + '-wal')
-
     qgs.exit()
+
+    cleanup(gps_track_folder)
 
 
 def _find_break(folder, filename):

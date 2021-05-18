@@ -8,8 +8,9 @@ from qgis.core import (QgsCoordinateReferenceSystem, QgsVectorLayer)
 import os
 from pathlib import Path
 from gps_reader_pkg.convert_csv import Convert
-from gps_reader_pkg.config import Config, create_folder
+from gps_reader_pkg.config import Config
 from gps_reader_pkg.qgis_app_init import QgisSetup
+from gps_reader_pkg.folder_methods import create_folder, cleanup
 import click
 
 
@@ -26,11 +27,10 @@ def main(config):
     """
     config = Config(config)
 
-    #Initialise QGIS instance from path in config file
+    # Initialise QGIS instance from path in config file
     qgs = QgisSetup().setup(config)
     if not qgs:
         return False
-
 
     gps_track_folder = config['output']['gpkg_folder']
     if gps_track_folder is None:
@@ -73,18 +73,9 @@ def main(config):
 
     qgs.exit()
 
-    #file cleanup
-    if os.path.isfile(output_path + '.gpkg-shm'):
-        os.remove(output_path + '.gpkg-shm')
-    if os.path.isfile(output_path + '.gpkg-wal'):
-        os.remove(output_path + '.gpkg-wal')
-
-    for filename in os.listdir(gps_track_folder):
-        if filename.endswith('.gpkg'):
-            if os.path.isfile(gps_track_folder + '/' + filename + '-shm'):
-                os.remove(gps_track_folder + '/' + filename + '-shm')
-            if os.path.isfile(gps_track_folder + '/' + filename + '-wal'):
-                os.remove(gps_track_folder + '/' + filename + '-wal')
+    # file cleanup
+    cleanup(output_path)
+    cleanup(gps_track_folder)
 
 if __name__ == "__main__":
     main()

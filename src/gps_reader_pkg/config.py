@@ -5,20 +5,6 @@ import yaml
 from pathlib import Path
 
 
-def create_folder(path):
-    """Method to create path. Will also create parent folders if don't exist.
-
-    Args:
-        path (pathlib.Path): path to folder to create
-    """
-    try:
-        path.mkdir(parents=True, exist_ok=False)
-    except FileExistsError:
-        print(f"{path} exists")
-    else:
-        print(f"{path} exists")
-
-
 class Config():
     """Class to import config file and create results folder for experiment.
     """

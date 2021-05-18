@@ -5,9 +5,10 @@ Script to scrape website for gps files & save path to json file
 import os
 from scrapy.crawler import CrawlerProcess
 from gps_reader_pkg.scraper_module import GPXSpider
-from gps_reader_pkg.config import Config, create_folder
+from gps_reader_pkg.config import Config
 import click
 from pathlib import Path
+from gps_reader_pkg.folder_methods import create_folder
 
 
 @click.command()

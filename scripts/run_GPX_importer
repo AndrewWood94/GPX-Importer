@@ -7,8 +7,10 @@ import requests
 from gps_reader_pkg.file_reader import GpxFileReader
 import glob
 import shutil
-from gps_reader_pkg.config import Config, create_folder
+from gps_reader_pkg.config import Config
 from gps_reader_pkg.qgis_app_init import QgisSetup
+from gps_reader_pkg.folder_methods import create_folder
+
 
 import click
 from pathlib import Path
