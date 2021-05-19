@@ -157,6 +157,7 @@ class BreakFinder:
 
         #Ignore tracks with under 250m or 2.5 min of travel, or high median speed (non walking)
         if total_dist < 250 or total_time < 150 or median_speed > 10:
+            datalayer.dataProvider().truncate()
             return False
 
         if plist is None:
