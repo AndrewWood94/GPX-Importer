@@ -34,6 +34,12 @@ def main(config):
         return False
 
     terrain_path = config['data']['terrain']['DTM_folder']
+    if terrain_path is None:
+        print('DTM Folder not given')
+        return False
+    if not (Path(terrain_path).exists()):
+        print('DTM Folder not found')
+        return False
     resolution = config['data']['terrain']['DTM_resolution']
 
     folder = config['output']['merged_folder']
