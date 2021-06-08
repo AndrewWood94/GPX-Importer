@@ -7,7 +7,7 @@ main <- function(){
     args <- commandArgs(trailingOnly = TRUE)
     filename <- args[1]
 
-    list.of.packages <- c("configr", "dplyr")
+    list.of.packages <- c("configr")
     new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
     if (length(new.packages)){
       install.packages(new.packages, repos = "http://cran.us.r-project.org")
@@ -25,7 +25,6 @@ walkingSlope = function(df){
   df["slopeOS"] = atan(df$OS.height_diff/df$distance)*180/pi
   df["slope"] = atan(df$elevation_diff/df$distance)*180/pi
   df[is.na(df)]=0
-  df = select(df, -OnBreak, everything())
   return(df)
 }
 
