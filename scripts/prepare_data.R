@@ -13,7 +13,6 @@ main <- function(){
       install.packages(new.packages, repos = "http://cran.us.r-project.org")
     }
 
-    suppressWarnings(suppressMessages(library(dplyr)))
     suppressWarnings(suppressMessages(library(configr)))
 
     parameters = read.config(file = filename)
