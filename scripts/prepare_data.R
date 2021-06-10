@@ -377,7 +377,7 @@ prepare = function(parameters){
     return("error")
   }
   else if (!dir.exists(out_folder)){
-    possible = tryCatch(
+    tryCatch(
       expr = {
         dir.create(out_folder)
         print(c("folder created: ", out_folder))
@@ -385,10 +385,6 @@ prepare = function(parameters){
       error = function(c){stop(c)},
       warning = function(c){stop(c)}
     )
-    if (possible[1] == "error"){
-      print(possible[2])
-      return("error")
-    }
   }
   if (is.null(processed_name)){
     print("output filename not specified")
