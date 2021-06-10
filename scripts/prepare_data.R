@@ -363,8 +363,8 @@ prepare = function(parameters){
   #Process & filter merged csv track to remove non valid sections
 
   type = tolower(parameters$filetype)
-  in_folder = parameters$input$merged_folder
-  in_file = parameters$input$merged_name
+  in_folder = parameters$output$merged_folder
+  in_file = parameters$output$merged_name
   in_hikr = parameters$data$processed_hikr_filepath
   out_folder = parameters$output$processed_folder
   valid_breaks = parameters$output$optional$valid_breaks_filename
@@ -377,8 +377,22 @@ prepare = function(parameters){
     return("error")
   }
   else if (!dir.exists(out_folder)){
-    dir.create(out_folder)
-    print(c("folder created: ", out_folder))
+    possible = tryCatch(
+      expr = {
+        dir.create(out_folder)
+        print(c("folder created: ", out_folder))
+      },
+      error = function(c){stop(c)},
+      warning = function(c){stop(c)}
+    )
+    if (possible[1] == "error"){
+      print(possible[2])
+      return("error")
+    }
+  }
+  if (is.null(processed_name)){
+    print("output filename not specified")
+    return("error")
   }
 
 
@@ -408,7 +422,7 @@ prepare = function(parameters){
       #HikrValues = list(Q3max = 5.869302,whiskermax = 7.490433,medmed = 3.02698,minQ3 = 2.448512)
   }
 
-  AllData = read.csv(paste0(in_folder,'/',in_file), header = TRUE, sep = ",", stringsAsFactors = FALSE)
+  AllData = read.csv(paste0(in_folder,'/',in_file,'.csv'), header = TRUE, sep = ",", stringsAsFactors = FALSE)
 
   #Calculate walking slope values & set zero movement points to breaks
 
