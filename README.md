@@ -91,7 +91,7 @@ Descriptions of each variable, and the scripts in which they are used are shown 
 - **qgis_path** :  
 The path of the qgis executable within the conda environment  
 On MacOS: /path/to/conda/environemnt/QGIS.app/Contents/MacOS  
-On windows: /path/to/conda/environemnt/QGIS.app/Library/bin
+On windows: /path/to/conda/environemnt/QGIS.app/Library/bin  
 ```run_gpx_importer```
 ```find_breaks```
 ```merge_tracks```
