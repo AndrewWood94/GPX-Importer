@@ -110,7 +110,7 @@ class TerrainClassifier:
         point = QgsPointXY(x, y)
 
         if not self.elev_boundaries.contains(point):
-            elev_path = self.data_file_path + "/" + tile_name[0:2] + "/" + tile_name + ".asc"
+            elev_path = self.data_file_path + "/" + tile_name[0:2].lower() + "/" + tile_name + ".asc"
             if os.path.isfile(elev_path):
                 self.elev_layer = QgsRasterLayer(elev_path)
                 self.elev_boundaries = self.elev_layer.extent()
@@ -132,7 +132,7 @@ class TerrainClassifier:
             else:
                 dummy_tile_name = get_tile_name(slope_coordinates[key][0], slope_coordinates[key][1])
                 dummy_elev_path = self.data_file_path + "/" + dummy_tile_name[
-                                                              0:2] + "/" + dummy_tile_name + ".asc"
+                                                              0:2].lower() + "/" + dummy_tile_name + ".asc"
                 if os.path.isfile(dummy_elev_path):
                     dummy_elev_layer = QgsRasterLayer(dummy_elev_path)
                     elevation_array[key] = dummy_elev_layer.dataProvider().sample(slope_coordinates[key], 1)[0]
