@@ -31,7 +31,7 @@ def main(config):
     config = Config(config)
 
     #Initialise QGIS instance from path in config file
-    qgs = QgisSetup().setup(config)
+    qgs = QgisSetup()
     if not qgs:
         return False
 
