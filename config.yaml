@@ -1,6 +1,3 @@
-
-#folder containing QGIS executable
-qgis_path: /path/to/conda/environment/QGIS.app/Contents/MacOS
 #filetype should be either Hikr or OSM
 filetype: hikr
 data:

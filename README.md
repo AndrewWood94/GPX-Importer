@@ -88,15 +88,6 @@ The file config.yaml contained within this repository is used as the configurati
 for reading and importing the data, and should be edited to point to the correct file locations.
 Descriptions of each variable, and the scripts in which they are used are shown below. 
 
-- **qgis_path** :  
-The path of the qgis executable within the conda environment  
-On MacOS: /path/to/conda/environemnt/QGIS.app/Contents/MacOS  
-On windows: /path/to/conda/environemnt/QGIS.app/Library/bin  
-```run_gpx_importer```
-```find_breaks```
-```merge_tracks```
-```get_terrain```
-
 - **filetype** :  
 should be set to either *osm* or *hikr* depending on which data type is being read  
 ```run_gpx_importer```
