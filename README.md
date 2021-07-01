@@ -109,11 +109,7 @@ should be set to either *osm* or *hikr* depending on which data type is being re
       Address of Hikr results to parse for GPS data  
       ```scrape```  
       - **folder** : 
-      Path to location of json file containing hikr data links  
-      ```scrape```
-      ```run_gpx_importer``` 
-      - **name** :  
-      Filename of json file containing hikr data links  
+      Location to save and read hikr GPS data files  
       ```scrape```
       ```run_gpx_importer``` 
     - **osm**
@@ -190,14 +186,22 @@ should be set to either *osm* or *hikr* depending on which data type is being re
 
 ### GPS tracks:
 
-The list of Hikr tracks used can be found in hikr_filepaths.json file in the data folder.
-If desired, this file can be reproduced by running the ```scrape``` script with 
-[website] = https://www.hikr.org/region518/ped/?gps=1 in the config file.
+The Hikr tracks used can be replicated by running the ```scrape``` script with 
+[website] = https://www.hikr.org/region518/ped/?gps=1 in the config file.  
 
 ```Bash
 scrape -c config.yaml
 
 #windows: python scripts/scrape -c config.yaml
+```
+
+Note: As the Hikr website is live and may be updated, the list of tracks used in the paper are provided in 
+the hikr_filepaths.json file and can be downloaded using:
+
+```python
+python
+>>> from gps_reader_pkg.download_hikr import getHikr
+>>> getHikr('/path/to/destination/folder', 'data/hikr_filepaths.json')
 ```
 
 The OpenStreetMap (OSM) tracks used are saved in the scotland-osm-tracks.zip file which should be unzipped. This is a copy of 

@@ -9,6 +9,7 @@ from gps_reader_pkg.config import Config
 import click
 from pathlib import Path
 from gps_reader_pkg.folder_methods import create_folder
+from gps_reader_pkg.download_hikr import getHikr
 
 
 @click.command()
@@ -21,18 +22,15 @@ def main(config):
     :return: filepaths json - list of paths to gpx tracks
     """
     config = Config(config)
-    filename = config['data']['GPS_files']['hikr']['name']
-    if filename is None:
-        print('json output name not given, defaulting to "filepaths"')
-        filename = 'filepaths'
-    json_path = config['data']['GPS_files']['hikr']['folder']
-    if json_path is None:
-        print('json output path not specified')
+    destination_folder = config['data']['GPS_files']['hikr']['folder']
+    if destination_folder is None:
+        print('Hikr data destination path not specified')
         return False
     else:
-        create_folder(Path(json_path))
+        create_folder(Path(destination_folder))
+    json_name = 'filepaths.json'
 
-    path = config['data']['GPS_files']['hikr']['folder'] + '/' + filename + '.json'
+    json_path = destination_folder + '/' + json_name
     website = config['data']['GPS_files']['hikr']['website']
     if website is None:
         print('Site to scrape not given')
@@ -40,15 +38,17 @@ def main(config):
 
     process = CrawlerProcess(settings={
         "FEEDS": {
-            path: {"format": "json"},
+            json_path: {"format": "json"},
         },
     })
 
-    if os.path.exists(path):
-        os.remove(path)
+    if os.path.exists(json_path):
+        os.remove(json_path)
     process.crawl(GPXSpider, input='inputargument', start_urls=[website])
     process.start()
 
+    getHikr(destination_folder, json_path)
+    os.remove(json_path)
 
 if __name__ == "__main__":
     main()
