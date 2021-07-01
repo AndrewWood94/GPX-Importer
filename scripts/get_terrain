@@ -96,8 +96,8 @@ def main(config):
             csv_input.loc[index, 'a_OS height'] = height_a
             csv_input.loc[index, 'b_OS height'] = height_b
             csv_input.loc[index, 'OS height_diff'] = height_b - height_a
-            csv_input.loc[index, 'a_OS slope'] = slope_a
-            csv_input.loc[index, 'b_OS slope'] = slope_b
+            csv_input.loc[index, 'a_hill slope'] = slope_a
+            csv_input.loc[index, 'b_hill slope'] = slope_b
         csv_input.to_csv(merged_file, index=False)
 
     qgs.exit()
