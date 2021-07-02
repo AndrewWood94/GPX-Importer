@@ -7,8 +7,9 @@ data:
     hikr:
       #site for web scraper to find gps tracks
       website: https://www.hikr.org/region518/ped/?gps=1
-      #destination to save/read Hikr GPS files
-      folder: data/hikr/
+      #location of json file containing hikr data links
+      folder: data
+      name: hikr_filepaths
     osm:
       #folder containing OpenStreetMap tracks to be read
       folder: data/scotland-osm-tracks
