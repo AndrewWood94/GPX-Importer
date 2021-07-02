@@ -174,8 +174,8 @@ datamerge=function(df,type, condition, terrain = list()){
         }
 
         #Calculate slopes as weighted average of time spent on slope
-        variables$avg_ground_slope_a = variables$avg_ground_slope_a + (sample[i,]$a_hill.slope*sample[i,]$duration)
-        variables$avg_ground_slope_b = variables$avg_ground_slope_b + (sample[i,]$b_hill.slope*sample[i,]$duration)
+        variables$avg_ground_slope_a = variables$avg_ground_slope_a + (sample[i,]$a_OS.slope*sample[i,]$duration)
+        variables$avg_ground_slope_b = variables$avg_ground_slope_b + (sample[i,]$b_OS.slope*sample[i,]$duration)
 
         if (sample[i,]$distance>0){
           variables$avg_slopeOS = variables$avg_slopeOS + atan(sample[i,]$OS.height_diff/sample[i,]$distance)*180/pi*sample[i,]$duration
